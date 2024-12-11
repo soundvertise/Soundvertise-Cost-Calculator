@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Cost Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: url('Fabhertz_aesthetic_background_wallpaper_for_a_website_landing_p_bbf86bfd-9b57-4afc-b01e-4da55c2315f3.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-top: 30px;
+        }
+        header img {
+            max-width: 250px;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 30px;
+            width: 90%;
+            max-width: 1200px;
+            flex-wrap: nowrap;
+        }
+        .calculator, .summary, .discount-panel {
+            padding: 20px;
+            background: rgba(26, 26, 26, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+        }
+        h1, h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        label {
+            font-size: 1.2em;
+        }
+        .playlist-group {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .playlist-group label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .playlist-group .campaign-option {
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+        input[type="radio"] {
+            margin-right: 5px;
+        }
+        select, button {
+            font-size: 1em;
+            margin: 10px 0;
+            padding: 10px;
+            width: 90%;
+            border: none;
+            border-radius: 5px;
+        }
+        select {
+            background-color: #262626;
+            color: #ffffff;
+        }
+        button {
+            background-color: #ffffff;
+            color: #000000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #9575cd;
+            color: #ffffff;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .download-btn {
+            margin-top: 20px;
+            background-color: #6a47a0;
+            color: #ffffff;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            width: auto;
+        }
+        .download-btn:hover {
+            background-color: #9575cd;
+        }
+        .summary-list {
+            font-size: 1em;
+            line-height: 1.5;
+            white-space: normal;
+            text-align: left;
+        }
+        /* Color classes for playlist discounts */
+        .discount-blue { color: #00BFFF; }   /* D1 playlist (>1) */
+        .discount-fuchsia { color: #FF00FF; }/* D2 playlist (>3) */
+        .discount-pink { color: #FFC0CB; }   /* D3 playlist (>6) */
+
+        /* Months discount colors */
+        .discount-yellow { color: #FFFF00; } /* D1 months (>3) */
+        .discount-orange { color: #FFA500; } /* D2 months (>6) */
+
+        .calculator { order: 1; }
+        .summary { order: 2; }
+        .discount-panel { order: 3; }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="LOGO WHITE NO BACKGROUND .png" alt="Soundvertise Logo">
+    </header>
+    <div class="container">
+        <div id="content" class="calculator">
+            <h1>Service Cost Calculator</h1>
+
+            <div id="playlist-options"></div>
+
+            <label for="num-playlist">Number Of Playlists:</label>
+            <select id="num-playlist" onchange="updatePlaylists()">
+                <option value="1" selected>1 Playlist</option>
+                <option value="2">2 Playlists</option>
+                <option value="3">3 Playlists</option>
+                <option value="4">4 Playlists</option>
+                <option value="5">5 Playlists</option>
+                <option value="6">6 Playlists</option>
+                <option value="7">7 Playlists</option>
+                <option value="8">8 Playlists</option>
+            </select>
+
+            <label for="durata">Promotion Duration (Months):</label>
+            <select id="durata">
+                <option value="1" selected>1 month</option>
+                <option value="2">2 months</option>
+                <option value="3">3 months</option>
+                <option value="4">4 months</option>
+                <option value="5">5 months</option>
+                <option value="6">6 months</option>
+            </select>
+
+            <button onclick="calculateCost()">Calculate Cost</button>
+            <div class="result" id="result"></div>
+        </div>
+
+        <div class="summary">
+            <h2>Summarize</h2>
+            <div id="summary-info" class="summary-list"></div>
+        </div>
+
+        <div class="discount-panel">
+            <h2>Discounts</h2>
+            <h3>Number Of Playlists</h3>
+            <p><span class="discount-blue">Discount 1:</span> More than 1 playlist</p>
+            <p><span class="discount-fuchsia">Discount 2:</span> More than 3 playlists</p>
+            <p><span class="discount-pink">Discount 3:</span> More than 6 playlists</p>
+
+            <h3>Months</h3>
+            <p><span class="discount-yellow">Discount 1:</span> More than 3 months</p>
+            <p><span class="discount-orange">Discount 2:</span> More than 6 months</p>
+        </div>
+    </div>
+    <button class="download-btn" onclick="downloadScreenshot()">DOWNLOAD</button>
+
+    <script>
+        const priceTable = {
+            1: { new_campaign:150, renew_2_mesi:100, renew_3_mesi:100, renew_4_mesi:80, renew_5_mesi:80, renew_6_mesi:70 },
+            2: { new_campaign:100, renew_2_mesi:50,  renew_3_mesi:50,  renew_4_mesi:40, renew_5_mesi:40, renew_6_mesi:35 },
+            3: { new_campaign:100, renew_2_mesi:50,  renew_3_mesi:50,  renew_4_mesi:40, renew_5_mesi:40, renew_6_mesi:35 },
+            4: { new_campaign:80,  renew_2_mesi:40,  renew_3_mesi:40,  renew_4_mesi:35, renew_5_mesi:35, renew_6_mesi:30 },
+            5: { new_campaign:80,  renew_2_mesi:40,  renew_3_mesi:40,  renew_4_mesi:35, renew_5_mesi:35, renew_6_mesi:30 },
+            6: { new_campaign:80,  renew_2_mesi:40,  renew_3_mesi:40,  renew_4_mesi:35, renew_5_mesi:35, renew_6_mesi:30 },
+            7: { new_campaign:65,  renew_2_mesi:35,  renew_3_mesi:35,  renew_4_mesi:30, renew_5_mesi:30, renew_6_mesi:25 },
+            8: { new_campaign:65,  renew_2_mesi:35,  renew_3_mesi:35,  renew_4_mesi:30, renew_5_mesi:30, renew_6_mesi:25 },
+        };
+
+        function updatePlaylists() {
+            const numPlaylists = parseInt(document.getElementById("num-playlist").value);
+            const playlistOptions = document.getElementById("playlist-options");
+            playlistOptions.innerHTML = '';
+
+            for (let i = 1; i <= numPlaylists; i++) {
+                const div = document.createElement('div');
+                div.className = 'playlist-group';
+                div.innerHTML = `
+                    <label>Playlist ${i}:</label>
+                    <label class="campaign-option"><input type="radio" name="playlist-${i}" value="new" checked> New Campaign</label>
+                    <label class="campaign-option"><input type="radio" name="playlist-${i}" value="renew"> Renew</label>
+                `;
+                playlistOptions.appendChild(div);
+            }
+        }
+
+        function calculateCost() {
+            const numPlaylists = parseInt(document.getElementById("num-playlist").value);
+            const duration = parseInt(document.getElementById("durata").value);
+
+            // Definizione discount playlist
+            let playlistD1 = numPlaylists > 1; 
+            let playlistD2 = numPlaylists > 3; 
+            let playlistD3 = numPlaylists > 6; 
+
+            // Definizione discount mesi
+            let monthsD1 = duration > 3;
+            let monthsD2 = duration > 6;
+
+            let totalCost = 0;
+            let details = '';
+
+            for (let i = 1; i <= numPlaylists; i++) {
+                const campaignType = document.querySelector(`input[name="playlist-${i}"]:checked`).value;
+                const pTable = priceTable[i];
+
+                let playlistCost = 0;
+                let playlistLabel = `Playlist ${i}:`;
+
+                // Colorazione cumulativa playlist
+                if (playlistD3 && i >= 7) {
+                    playlistLabel = `<span class="discount-pink">Playlist ${i}:</span>`;
+                } else if (playlistD2 && i >= 4) {
+                    playlistLabel = `<span class="discount-fuchsia">Playlist ${i}:</span>`;
+                } else if (playlistD1 && i >= 2) {
+                    playlistLabel = `<span class="discount-blue">Playlist ${i}:</span>`;
+                }
+
+                let breakdown = `<div>${playlistLabel}<br>`;
+
+                const isRenew = (campaignType === 'renew');
+
+                if (campaignType === 'new') {
+                    // Campaign New
+                    if (duration === 1) {
+                        playlistCost = pTable.new_campaign;
+                        // Month 1 no color per NEW anche se discount mesi
+                        breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
+                    } else {
+                        // Mese 1 non colorato (NEW)
+                        breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
+                        playlistCost += pTable.new_campaign;
+
+                        const renewKey = `renew_${duration}_mesi`;
+                        const monthlyCost = pTable[renewKey];
+                        for (let m = 2; m <= duration; m++) {
+                            let monthLabel = `Month ${m}:`;
+                            // month coloring for NEW starts from month 2 if discount
+                            if (monthsD2) {
+                                if (m >= 4) {
+                                    monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
+                                } else {
+                                    monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
+                                }
+                            } else if (monthsD1) {
+                                monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
+                            }
+                            breakdown += `&nbsp;&nbsp;${monthLabel} €${monthlyCost}<br>`;
+                            playlistCost += monthlyCost;
+                        }
+                    }
+                } else {
+                    // Campaign Renew
+                    // Se Renew e sconto mesi, anche month 1 è colorato
+                    if (duration === 1) {
+                        const monthlyCost = pTable.renew_2_mesi;
+                        // 1 mese Renew: se discount mesi? 
+                        // In realtà con 1 mese non c'è more than 3 months, quindi no discount
+                        breakdown += `&nbsp;&nbsp;Month 1: €${monthlyCost}<br>`;
+                        playlistCost = monthlyCost;
+                    } else {
+                        const renewKey = `renew_${duration}_mesi`;
+                        const monthlyCost = pTable[renewKey];
+                        for (let m = 1; m <= duration; m++) {
+                            let monthLabel = `Month ${m}:`;
+                            // Logica Renew:
+                            // Se monthsD2: month 4+ orange, month 1-3 yellow (anche il 1)
+                            // Se monthsD1 (senza D2): tutti i mesi gialli, compreso 1
+                            if (monthsD2) {
+                                if (m >= 4) {
+                                    monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
+                                } else {
+                                    monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
+                                }
+                            } else if (monthsD1) {
+                                // tutti gialli, anche month 1
+                                monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
+                            }
+                            breakdown += `&nbsp;&nbsp;${monthLabel} €${monthlyCost}<br>`;
+                            playlistCost += monthlyCost;
+                        }
+                    }
+                }
+
+                breakdown += `&nbsp;&nbsp;Total: €${playlistCost}</div><br>`;
+                details += breakdown;
+                totalCost += playlistCost;
+            }
+
+            // Dicitura discounts
+            let discountSummary = "";
+            const anyPlaylistDiscount = playlistD1 || playlistD2 || playlistD3;
+            const anyMonthsDiscount = monthsD1 || monthsD2;
+
+            if (anyPlaylistDiscount || anyMonthsDiscount) {
+                discountSummary += "Discount Applied:<br>";
+
+                // Mostriamo tutti i discount attivi per playlist
+                if (playlistD1) {
+                    discountSummary += `<span class="discount-blue">Playlist Discount 1 (More than 1 playlist)</span><br>`;
+                }
+                if (playlistD2) {
+                    discountSummary += `<span class="discount-fuchsia">Playlist Discount 2 (More than 3 playlists)</span><br>`;
+                }
+                if (playlistD3) {
+                    discountSummary += `<span class="discount-pink">Playlist Discount 3 (More than 6 playlists)</span><br>`;
+                }
+
+                // Mostriamo tutti i discount attivi per mesi
+                if (monthsD1) {
+                    discountSummary += `<span class="discount-yellow">Months Discount 1 (More than 3 months)</span><br>`;
+                }
+                if (monthsD2) {
+                    discountSummary += `<span class="discount-orange">Months Discount 2 (More than 6 months)</span><br>`;
+                }
+            } else {
+                discountSummary += "No Discounts Applied.";
+            }
+
+            details += `<div>${discountSummary}</div>`;
+
+            document.getElementById("result").innerText = `Total Cost: €${totalCost}`;
+            document.getElementById("summary-info").innerHTML = details;
+        }
+
+        function downloadScreenshot() {
+            html2canvas(document.body, { allowTaint: true, useCORS: true }).then((canvas) => {
+                const link = document.createElement("a");
+                link.download = "service-cost-screenshot.png";
+                link.href = canvas.toDataURL("image/png");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        // Inizializzazione con 1 playlist di default
+        updatePlaylists();
+    </script>
+</body>
+</html>
