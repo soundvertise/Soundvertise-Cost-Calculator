@@ -108,7 +108,7 @@
 
         /* Months discount colors */
         .discount-yellow { color: #FFFF00; } /* D1 months (>3) */
-        .discount-orange { color: #FFA500; } /* D2 months (>6) */
+        .discount-orange { color: #FFA500; } /* D2 months (>5) */
 
         .calculator { order: 1; }
         .summary { order: 2; }
@@ -163,7 +163,7 @@
 
             <h3>Months</h3>
             <p><span class="discount-yellow">Discount 1:</span> More than 3 months</p>
-            <p><span class="discount-orange">Discount 2:</span> More than 6 months</p>
+            <p><span class="discount-orange">Discount 2:</span> More than 5 months</p>
         </div>
     </div>
 
@@ -200,12 +200,14 @@
             const numPlaylists = parseInt(document.getElementById("num-playlist").value);
             const duration = parseInt(document.getElementById("durata").value);
 
+            // Playlist discounts
             let playlistD1 = numPlaylists > 1; 
             let playlistD2 = numPlaylists > 3; 
             let playlistD3 = numPlaylists > 6; 
 
+            // Months discounts
             let monthsD1 = duration > 3;
-            let monthsD2 = duration > 6;
+            let monthsD2 = duration > 5; // Modified: more than 5 months
 
             let totalCost = 0;
             let details = '';
@@ -226,8 +228,6 @@
                 }
 
                 let breakdown = `<div>${playlistLabel}<br>`;
-
-                const isRenew = (campaignType === 'renew');
 
                 if (campaignType === 'new') {
                     if (duration === 1) {
@@ -266,12 +266,16 @@
                         for (let m = 1; m <= duration; m++) {
                             let monthLabel = `Month ${m}:`;
                             if (monthsD2) {
+                                // D2 months: more than 5 months
+                                // Month 4 in poi arancione, 2-3 giallo, 1 giallo se Renew
                                 if (m >= 4) {
                                     monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
                                 } else {
                                     monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                                 }
                             } else if (monthsD1) {
+                                // D1 months: more than 3 months
+                                // Tutti i mesi (compreso 1) gialli se Renew
                                 monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                             }
                             breakdown += `&nbsp;&nbsp;${monthLabel} €${monthlyCost}<br>`;
@@ -306,7 +310,7 @@
                     discountSummary += `<span class="discount-yellow">Months Discount 1 (More than 3 months)</span><br>`;
                 }
                 if (monthsD2) {
-                    discountSummary += `<span class="discount-orange">Months Discount 2 (More than 6 months)</span><br>`;
+                    discountSummary += `<span class="discount-orange">Months Discount 2 (More than 5 months)</span><br>`;
                 }
             } else {
                 discountSummary += "No Discounts Applied.";
