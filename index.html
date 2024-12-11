@@ -137,9 +137,7 @@
     <div class="container">
         <div id="content" class="calculator">
             <h1>Service Cost Calculator</h1>
-
             <div id="playlist-options"></div>
-
             <label for="num-playlist">Number Of Playlists:</label>
             <select id="num-playlist" onchange="updatePlaylists()">
                 <option value="1" selected>1 Playlist</option>
@@ -251,7 +249,6 @@
                 const isRenew = (campaignType === 'renew');
 
                 if (campaignType === 'new') {
-                    // Campaign New
                     if (duration === 1) {
                         playlistCost = pTable.new_campaign;
                         // Month 1 no color per NEW anche se discount mesi
@@ -265,7 +262,6 @@
                         const monthlyCost = pTable[renewKey];
                         for (let m = 2; m <= duration; m++) {
                             let monthLabel = `Month ${m}:`;
-                            // month coloring for NEW starts from month 2 if discount
                             if (monthsD2) {
                                 if (m >= 4) {
                                     monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
@@ -280,12 +276,10 @@
                         }
                     }
                 } else {
-                    // Campaign Renew
-                    // Se Renew e sconto mesi, anche month 1 è colorato
+                    // Renew
                     if (duration === 1) {
                         const monthlyCost = pTable.renew_2_mesi;
-                        // 1 mese Renew: se discount mesi? 
-                        // In realtà con 1 mese non c'è more than 3 months, quindi no discount
+                        // 1 mese Renew, no discount per months con un solo mese
                         breakdown += `&nbsp;&nbsp;Month 1: €${monthlyCost}<br>`;
                         playlistCost = monthlyCost;
                     } else {
@@ -293,9 +287,8 @@
                         const monthlyCost = pTable[renewKey];
                         for (let m = 1; m <= duration; m++) {
                             let monthLabel = `Month ${m}:`;
-                            // Logica Renew:
-                            // Se monthsD2: month 4+ orange, month 1-3 yellow (anche il 1)
-                            // Se monthsD1 (senza D2): tutti i mesi gialli, compreso 1
+                            // Se renew e D1 mesi: tutti i mesi gialli
+                            // Se renew e D2 mesi: month 1-3 gialli, 4+ arancioni
                             if (monthsD2) {
                                 if (m >= 4) {
                                     monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
@@ -303,7 +296,6 @@
                                     monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                                 }
                             } else if (monthsD1) {
-                                // tutti gialli, anche month 1
                                 monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                             }
                             breakdown += `&nbsp;&nbsp;${monthLabel} €${monthlyCost}<br>`;
@@ -325,7 +317,6 @@
             if (anyPlaylistDiscount || anyMonthsDiscount) {
                 discountSummary += "Discount Applied:<br>";
 
-                // Mostriamo tutti i discount attivi per playlist
                 if (playlistD1) {
                     discountSummary += `<span class="discount-blue">Playlist Discount 1 (More than 1 playlist)</span><br>`;
                 }
@@ -336,7 +327,6 @@
                     discountSummary += `<span class="discount-pink">Playlist Discount 3 (More than 6 playlists)</span><br>`;
                 }
 
-                // Mostriamo tutti i discount attivi per mesi
                 if (monthsD1) {
                     discountSummary += `<span class="discount-yellow">Months Discount 1 (More than 3 months)</span><br>`;
                 }
@@ -354,7 +344,8 @@
         }
 
         function downloadScreenshot() {
-            html2canvas(document.body, { allowTaint: true, useCORS: true }).then((canvas) => {
+            // Cattura solo il contenitore .container per evitare parti bianche
+            html2canvas(document.querySelector('.container'), { useCORS: true }).then((canvas) => {
                 const link = document.createElement("a");
                 link.download = "service-cost-screenshot.png";
                 link.href = canvas.toDataURL("image/png");
@@ -364,8 +355,8 @@
             });
         }
 
-        // Inizializzazione con 1 playlist di default
         updatePlaylists();
     </script>
 </body>
 </html>
+
