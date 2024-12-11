@@ -96,20 +96,6 @@
             font-weight: bold;
             color: #ffffff;
         }
-        .download-btn {
-            margin-top: 20px;
-            background-color: #6a47a0;
-            color: #ffffff;
-            padding: 5px 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 0.9em;
-            cursor: pointer;
-            width: auto;
-        }
-        .download-btn:hover {
-            background-color: #9575cd;
-        }
         .summary-list {
             font-size: 1em;
             line-height: 1.5;
@@ -181,7 +167,6 @@
             <p><span class="discount-orange">Discount 2:</span> More than 6 months</p>
         </div>
     </div>
-    <button class="download-btn" onclick="downloadScreenshot()">DOWNLOAD</button>
 
     <script>
         const priceTable = {
@@ -216,12 +201,10 @@
             const numPlaylists = parseInt(document.getElementById("num-playlist").value);
             const duration = parseInt(document.getElementById("durata").value);
 
-            // Definizione discount playlist
             let playlistD1 = numPlaylists > 1; 
             let playlistD2 = numPlaylists > 3; 
             let playlistD3 = numPlaylists > 6; 
 
-            // Definizione discount mesi
             let monthsD1 = duration > 3;
             let monthsD2 = duration > 6;
 
@@ -235,7 +218,6 @@
                 let playlistCost = 0;
                 let playlistLabel = `Playlist ${i}:`;
 
-                // Colorazione cumulativa playlist
                 if (playlistD3 && i >= 7) {
                     playlistLabel = `<span class="discount-pink">Playlist ${i}:</span>`;
                 } else if (playlistD2 && i >= 4) {
@@ -251,10 +233,8 @@
                 if (campaignType === 'new') {
                     if (duration === 1) {
                         playlistCost = pTable.new_campaign;
-                        // Month 1 no color per NEW anche se discount mesi
                         breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
                     } else {
-                        // Mese 1 non colorato (NEW)
                         breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
                         playlistCost += pTable.new_campaign;
 
@@ -279,7 +259,6 @@
                     // Renew
                     if (duration === 1) {
                         const monthlyCost = pTable.renew_2_mesi;
-                        // 1 mese Renew, no discount per months con un solo mese
                         breakdown += `&nbsp;&nbsp;Month 1: €${monthlyCost}<br>`;
                         playlistCost = monthlyCost;
                     } else {
@@ -287,8 +266,6 @@
                         const monthlyCost = pTable[renewKey];
                         for (let m = 1; m <= duration; m++) {
                             let monthLabel = `Month ${m}:`;
-                            // Se renew e D1 mesi: tutti i mesi gialli
-                            // Se renew e D2 mesi: month 1-3 gialli, 4+ arancioni
                             if (monthsD2) {
                                 if (m >= 4) {
                                     monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
@@ -309,7 +286,6 @@
                 totalCost += playlistCost;
             }
 
-            // Dicitura discounts
             let discountSummary = "";
             const anyPlaylistDiscount = playlistD1 || playlistD2 || playlistD3;
             const anyMonthsDiscount = monthsD1 || monthsD2;
@@ -343,20 +319,7 @@
             document.getElementById("summary-info").innerHTML = details;
         }
 
-        function downloadScreenshot() {
-            // Cattura solo il contenitore .container per evitare parti bianche
-            html2canvas(document.querySelector('.container'), { useCORS: true }).then((canvas) => {
-                const link = document.createElement("a");
-                link.download = "service-cost-screenshot.png";
-                link.href = canvas.toDataURL("image/png");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-        }
-
         updatePlaylists();
     </script>
 </body>
 </html>
-
