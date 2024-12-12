@@ -39,6 +39,9 @@
             width: 100%;
             text-align: center;
         }
+        .summary, .discount-panel {
+            text-align: left;
+        }
         h1, h2 {
             font-size: 2em;
             margin-bottom: 20px;
@@ -113,6 +116,13 @@
         .calculator { order: 1; }
         .summary { order: 2; }
         .discount-panel { order: 3; }
+
+        .disclaimer {
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 20px;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -164,12 +174,16 @@
             <h3>Months</h3>
             <p><span class="discount-yellow">Discount 1:</span> More than 3 months</p>
             <p><span class="discount-orange">Discount 2:</span> More than 5 months</p>
+
+            <div class="disclaimer">
+                * If the Playlist 1 is already active and optimized, we do provide a discount of 50€ for the activation *
+            </div>
         </div>
     </div>
 
     <script>
         const priceTable = {
-            1: { new_campaign:150, renew_2_mesi:100, renew_3_mesi:100, renew_4_mesi:80, renew_5_mesi:80, renew_6_mesi:70 },
+            1: { new_campaign:200, renew_2_mesi:100, renew_3_mesi:100, renew_4_mesi:80, renew_5_mesi:80, renew_6_mesi:70 },
             2: { new_campaign:100, renew_2_mesi:50,  renew_3_mesi:50,  renew_4_mesi:40, renew_5_mesi:40, renew_6_mesi:35 },
             3: { new_campaign:100, renew_2_mesi:50,  renew_3_mesi:50,  renew_4_mesi:40, renew_5_mesi:40, renew_6_mesi:35 },
             4: { new_campaign:80,  renew_2_mesi:40,  renew_3_mesi:40,  renew_4_mesi:35, renew_5_mesi:35, renew_6_mesi:30 },
@@ -200,14 +214,12 @@
             const numPlaylists = parseInt(document.getElementById("num-playlist").value);
             const duration = parseInt(document.getElementById("durata").value);
 
-            // Playlist discounts
             let playlistD1 = numPlaylists > 1; 
             let playlistD2 = numPlaylists > 3; 
             let playlistD3 = numPlaylists > 6; 
 
-            // Months discounts
             let monthsD1 = duration > 3;
-            let monthsD2 = duration > 5; // Modified: more than 5 months
+            let monthsD2 = duration > 5; // D2 months if >5 months
 
             let totalCost = 0;
             let details = '';
@@ -217,8 +229,8 @@
                 const pTable = priceTable[i];
 
                 let playlistCost = 0;
-                let playlistLabel = `Playlist ${i}:`;
 
+                let playlistLabel = `Playlist ${i}:`;
                 if (playlistD3 && i >= 7) {
                     playlistLabel = `<span class="discount-pink">Playlist ${i}:</span>`;
                 } else if (playlistD2 && i >= 4) {
@@ -229,27 +241,51 @@
 
                 let breakdown = `<div>${playlistLabel}<br>`;
 
+                const isRenew = (campaignType === 'renew');
+
+                function getMonthLabel(m) {
+                    let monthLabel = `Month ${m}:`;
+                    if (monthsD2) {
+                        // Discount 2 months: tutti i mesi colore Discount 2
+                        if (isRenew) {
+                            // Renew: tutti i mesi arancioni, compreso il 1
+                            monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
+                        } else {
+                            // New: mese 1 non colorato, dal 2 in poi arancioni
+                            if (m === 1) {
+                                monthLabel = `Month ${m}:`;
+                            } else {
+                                monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
+                            }
+                        }
+                    } else if (monthsD1) {
+                        // Discount 1 months: tutti i mesi gialli se Renew, se New il primo no
+                        if (isRenew) {
+                            monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
+                        } else {
+                            if (m === 1) {
+                                monthLabel = `Month ${m}:`;
+                            } else {
+                                monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
+                            }
+                        }
+                    } 
+                    return monthLabel;
+                }
+
                 if (campaignType === 'new') {
                     if (duration === 1) {
                         playlistCost = pTable.new_campaign;
                         breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
                     } else {
-                        breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
+                        let month1Label = getMonthLabel(1);
+                        breakdown += `&nbsp;&nbsp;${month1Label} €${pTable.new_campaign}<br>`;
                         playlistCost += pTable.new_campaign;
 
                         const renewKey = `renew_${duration}_mesi`;
                         const monthlyCost = pTable[renewKey];
                         for (let m = 2; m <= duration; m++) {
-                            let monthLabel = `Month ${m}:`;
-                            if (monthsD2) {
-                                if (m >= 4) {
-                                    monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
-                                } else {
-                                    monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
-                                }
-                            } else if (monthsD1) {
-                                monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
-                            }
+                            let monthLabel = getMonthLabel(m);
                             breakdown += `&nbsp;&nbsp;${monthLabel} €${monthlyCost}<br>`;
                             playlistCost += monthlyCost;
                         }
@@ -264,20 +300,7 @@
                         const renewKey = `renew_${duration}_mesi`;
                         const monthlyCost = pTable[renewKey];
                         for (let m = 1; m <= duration; m++) {
-                            let monthLabel = `Month ${m}:`;
-                            if (monthsD2) {
-                                // D2 months: more than 5 months
-                                // Month 4 in poi arancione, 2-3 giallo, 1 giallo se Renew
-                                if (m >= 4) {
-                                    monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
-                                } else {
-                                    monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
-                                }
-                            } else if (monthsD1) {
-                                // D1 months: more than 3 months
-                                // Tutti i mesi (compreso 1) gialli se Renew
-                                monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
-                            }
+                            let monthLabel = getMonthLabel(m);
                             breakdown += `&nbsp;&nbsp;${monthLabel} €${monthlyCost}<br>`;
                             playlistCost += monthlyCost;
                         }
