@@ -39,9 +39,6 @@
             width: 100%;
             text-align: center;
         }
-        .summary, .discount-panel {
-            text-align: left;
-        }
         h1, h2 {
             font-size: 2em;
             margin-bottom: 20px;
@@ -114,8 +111,8 @@
         .discount-orange { color: #FFA500; } /* D2 months (>5) */
 
         .calculator { order: 1; }
-        .summary { order: 2; }
-        .discount-panel { order: 3; }
+        .summary { order: 2; text-align: center; }
+        .discount-panel { order: 3; text-align: center; }
 
         .disclaimer {
             font-size: 0.9em;
@@ -176,7 +173,7 @@
             <p><span class="discount-orange">Discount 2:</span> More than 5 months</p>
 
             <div class="disclaimer">
-                * If the Playlist 1 is already active and optimized, we do provide a discount of 50€ for the activation *
+                If Playlist 1 is already active and optimized, we offer a €50 discount on the activation fee
             </div>
         </div>
     </div>
@@ -259,7 +256,7 @@
                             }
                         }
                     } else if (monthsD1) {
-                        // Discount 1 months: tutti i mesi gialli se Renew, se New il primo no
+                        // Discount 1 months: se Renew tutti gialli, se New primo mese no
                         if (isRenew) {
                             monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                         } else {
