@@ -140,6 +140,9 @@
                 <option value="6">6 Playlists</option>
                 <option value="7">7 Playlists</option>
                 <option value="8">8 Playlists</option>
+                <!-- ADDED OPTIONS FOR 9 AND 10 PLAYLISTS -->
+                <option value="9">9 Playlists</option>
+                <option value="10">10 Playlists</option>
             </select>
 
             <label for="durata">Promotion Duration (Months):</label>
@@ -188,6 +191,9 @@
             6: { new_campaign:80,  renew_2_mesi:40,  renew_3_mesi:40,  renew_4_mesi:35, renew_5_mesi:35, renew_6_mesi:30 },
             7: { new_campaign:65,  renew_2_mesi:35,  renew_3_mesi:35,  renew_4_mesi:30, renew_5_mesi:30, renew_6_mesi:25 },
             8: { new_campaign:65,  renew_2_mesi:35,  renew_3_mesi:35,  renew_4_mesi:30, renew_5_mesi:30, renew_6_mesi:25 },
+            // ADDED SAME PRICE DATA FOR 9 AND 10 AS FOR 7 AND 8
+            9: { new_campaign:65,  renew_2_mesi:35,  renew_3_mesi:35,  renew_4_mesi:30, renew_5_mesi:30, renew_6_mesi:25 },
+            10: { new_campaign:65, renew_2_mesi:35,  renew_3_mesi:35,  renew_4_mesi:30, renew_5_mesi:30, renew_6_mesi:25 },
         };
 
         function updatePlaylists() {
@@ -223,10 +229,10 @@
 
             for (let i = 1; i <= numPlaylists; i++) {
                 const campaignType = document.querySelector(`input[name="playlist-${i}"]:checked`).value;
+                // Retrieve the relevant price table based on the playlist number
                 const pTable = priceTable[i];
 
                 let playlistCost = 0;
-
                 let playlistLabel = `Playlist ${i}:`;
                 if (playlistD3 && i >= 7) {
                     playlistLabel = `<span class="discount-pink">Playlist ${i}:</span>`;
@@ -237,18 +243,17 @@
                 }
 
                 let breakdown = `<div>${playlistLabel}<br>`;
-
                 const isRenew = (campaignType === 'renew');
 
                 function getMonthLabel(m) {
                     let monthLabel = `Month ${m}:`;
                     if (monthsD2) {
-                        // Discount 2 months: tutti i mesi colore Discount 2
+                        // Discount 2 months: all months in orange
                         if (isRenew) {
-                            // Renew: tutti i mesi arancioni, compreso il 1
+                            // Renew: all months orange
                             monthLabel = `<span class="discount-orange">Month ${m}:</span>`;
                         } else {
-                            // New: mese 1 non colorato, dal 2 in poi arancioni
+                            // New: month 1 not colored, from 2 on orange
                             if (m === 1) {
                                 monthLabel = `Month ${m}:`;
                             } else {
@@ -256,7 +261,7 @@
                             }
                         }
                     } else if (monthsD1) {
-                        // Discount 1 months: se Renew tutti gialli, se New primo mese no
+                        // Discount 1 months: if Renew all yellow, if New only from month 2
                         if (isRenew) {
                             monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                         } else {
@@ -266,7 +271,7 @@
                                 monthLabel = `<span class="discount-yellow">Month ${m}:</span>`;
                             }
                         }
-                    } 
+                    }
                     return monthLabel;
                 }
 
@@ -275,10 +280,12 @@
                         playlistCost = pTable.new_campaign;
                         breakdown += `&nbsp;&nbsp;Month 1: €${pTable.new_campaign}<br>`;
                     } else {
+                        // First month is "new_campaign"
                         let month1Label = getMonthLabel(1);
                         breakdown += `&nbsp;&nbsp;${month1Label} €${pTable.new_campaign}<br>`;
                         playlistCost += pTable.new_campaign;
 
+                        // Remaining months are "renew_duration_mesi"
                         const renewKey = `renew_${duration}_mesi`;
                         const monthlyCost = pTable[renewKey];
                         for (let m = 2; m <= duration; m++) {
@@ -325,7 +332,6 @@
                 if (playlistD3) {
                     discountSummary += `<span class="discount-pink">Playlist Discount 3 (More than 6 playlists)</span><br>`;
                 }
-
                 if (monthsD1) {
                     discountSummary += `<span class="discount-yellow">Months Discount 1 (More than 3 months)</span><br>`;
                 }
